@@ -156,6 +156,7 @@ func (c *Config) AuthCodeURL(state string, opts ...AuthCodeOption) string {
 	}
 	if c.RedirectURL != "" {
 		v.Set("redirect_uri", c.RedirectURL)
+		v.Set("prompt", "consent")
 	}
 	if len(c.Scopes) > 0 {
 		v.Set("scope", strings.Join(c.Scopes, " "))

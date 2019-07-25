@@ -26,7 +26,7 @@ var (
 		Timeout: timeout,
 	}
 
-	OuathScopes       = []string{"offline_access", "openid"}
+	OuathScopes       = []string{"https://graph.microsoft.com/User.Read"}
 	ClientIdConst     = getenv("CLIENT_ID")
 	TenantConst       = getenv("TENANT")
 	ClientSecretConst = getenv("CLIENT_SECRET")

@@ -47,6 +47,10 @@ func aadAuthHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	fmt.Printf("------------------------------")
+	fmt.Printf(oAuthToken.AccessToken)
+	fmt.Printf("------------------------------")
+
 	meResponse := getMeRequest(oAuthToken.AccessToken)
 	defer meResponse.Body.Close()
 
