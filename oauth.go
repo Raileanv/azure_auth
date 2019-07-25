@@ -44,7 +44,8 @@ func aadAuthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	oAuthToken, err := xOauth2Config.Exchange(context.Background(), authorizationCode)
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
 	fmt.Printf("------------------------------")
