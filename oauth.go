@@ -29,6 +29,9 @@ func oauthUrlHandler(w http.ResponseWriter, r *http.Request) {
 
 // Auth handler which will redirect to AAD
 func oauthHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("------------------------------------------------------")
+	fmt.Println("Start authentication")
+	fmt.Println("------------------------------------------------------")
 	state := randToken(48)
 	authorizationURL := xOauth2Config.AuthCodeURL(state)
 	http.Redirect(w, r, authorizationURL, 301)
@@ -36,6 +39,9 @@ func oauthHandler(w http.ResponseWriter, r *http.Request) {
 
 // process the redirection from AAD
 func aadAuthHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("------------------------------------------------------")
+	fmt.Println("Start handling callback from Azure")
+	fmt.Println("------------------------------------------------------")
 	authorizationCode := r.URL.Query().Get("code")
 
 	ck, err := r.Cookie("state")
@@ -47,10 +53,6 @@ func aadAuthHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-
-	fmt.Printf("------------------------------")
-	fmt.Printf(oAuthToken.AccessToken)
-	fmt.Printf("------------------------------")
 
 	meResponse := getMeRequest(oAuthToken.AccessToken)
 	defer meResponse.Body.Close()
@@ -65,13 +67,13 @@ func aadAuthHandler(w http.ResponseWriter, r *http.Request) {
 	token := OToken{Token: oAuthToken, PublicToken: "", TemporaryToken: fmt.Sprint(uuid.New())}
 
 	user := FindOrCreateUser(&token, &azureUserInfo)
-	authUrl := fmt.Sprint(BaseUrl, "/auth")
 	if (User{} == user) {
+		authUrl := fmt.Sprint(BaseUrl, "/auth")
 		http.Redirect(w, r, authUrl, http.StatusNotFound)
 	}
 
 	tempTokenURL := generateTempTokenUrl(token.TemporaryToken)
-	http.Redirect(w, r, tempTokenURL, 301)
+	http.Redirect(w, r, tempTokenURL, http.StatusFound)
 }
 
 func getMeRequest(token string) *http.Response {
@@ -86,8 +88,11 @@ func getMeRequest(token string) *http.Response {
 	meResponse, err := client.Do(meRequest)
 
 	if err != nil {
-		panic(fmt.Errorf("ERROR: %s", err))
+		fmt.Errorf("ERROR: %s", err)
 	}
+	fmt.Println("------------------------------------------------------")
+	fmt.Println("Get me request successfully")
+	fmt.Println("------------------------------------------------------")
 
 	return meResponse
 }

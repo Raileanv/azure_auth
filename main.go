@@ -26,7 +26,7 @@ var (
 		Timeout: timeout,
 	}
 
-	OuathScopes       = []string{"https://graph.microsoft.com/User.Read"}
+	OuathScopes       = []string{"User.Read", "offline_access", "User.ReadBasic.All"}
 	ClientIdConst     = getenv("CLIENT_ID")
 	TenantConst       = getenv("TENANT")
 	ClientSecretConst = getenv("CLIENT_SECRET")
@@ -50,12 +50,16 @@ func getenv(name string) string {
 }
 
 func getMeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("------------------------------------------------------")
+	fmt.Println("Start get me")
+	fmt.Println("------------------------------------------------------")
 	token := r.Header.Get("Authorization")
 
 	user := FindUserByPubToken(token)
 	if (user == User{}) {
 		http.Error(w, "Record not found", http.StatusNotFound)
-		return
+		authUrl := fmt.Sprint(BaseUrl, "/auth")
+		http.Redirect(w, r, authUrl, http.StatusNotFound)
 	}
 	meResponse := getMeRequest(user.AccessToken)
 	defer meResponse.Body.Close()
@@ -80,7 +84,9 @@ func getMeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func retryWithRefresh(user *User) {
+	fmt.Println("------------------------------------------------------")
 	fmt.Println("Trying to refresh token")
+	fmt.Println("------------------------------------------------------")
 	params := url.Values{}
 
 	params.Add("grant_type", "refresh_token")
@@ -103,7 +109,7 @@ func retryWithRefresh(user *User) {
 	response, err := client.Do(request)
 	if response.StatusCode != 200 {
 		fmt.Errorf("ERROR: %s", "Can not refresh token, try to auth again")
-
+		return
 	}
 	defer response.Body.Close()
 
@@ -125,6 +131,9 @@ func retryWithRefresh(user *User) {
 }
 
 func getPhotoHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("------------------------------------------------------")
+	fmt.Println("Start get photo")
+	fmt.Println("------------------------------------------------------")
 	token := r.Header.Get("Authorization")
 
 	user := FindUserByPubToken(token)
