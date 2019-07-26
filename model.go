@@ -92,6 +92,9 @@ func (user *User) UpdateToken(t *OToken) {
 	if t.AccessToken != "" {
 		user.AccessToken = t.AccessToken
 	}
+	if t.RefreshToken != "" {
+		user.RefreshToken = t.RefreshToken
+	}
 	user.TemporaryToken = t.TemporaryToken
 	user.ClientPublicToken = t.PublicToken
 
